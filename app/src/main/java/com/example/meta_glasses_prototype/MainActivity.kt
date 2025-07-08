@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
+import android.util.Log
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 
@@ -45,10 +46,17 @@ class MainActivity : AppCompatActivity() {
                             inputStream?.close()
 
                             if (originalBitmap != null) {
-                                val blurredBitmap = ImageProcessor.blurFaces(this@MainActivity, originalBitmap)
-
                                 val originalFileName = getFileNameFromUri(this@MainActivity, uri)
                                     ?: "Image_${System.currentTimeMillis()}_${successCount}"
+
+                                val processedFileName = "Processed_$originalFileName"
+                                if (isImageAlreadyProcessed(processedFileName)) {
+                                    Log.d("ImageSkip", "Skipping $processedFileName (already processed)")
+                                    continue
+                                }
+
+                                val blurredBitmap = ImageProcessor.blurFaces(this@MainActivity, originalBitmap)
+
 
                                 FileManager.saveBitmap(
                                     context = this@MainActivity,
@@ -140,4 +148,23 @@ class MainActivity : AppCompatActivity() {
         }
         return null
     }
+
+    private fun isImageAlreadyProcessed(fileName: String): Boolean {
+        val projection = arrayOf(MediaStore.Images.Media.DISPLAY_NAME)
+        val selection = "${MediaStore.Images.Media.DISPLAY_NAME} = ?"
+        val selectionArgs = arrayOf(fileName)
+
+        contentResolver.query(
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            projection,
+            selection,
+            selectionArgs,
+            null
+        )?.use { cursor ->
+            return cursor.moveToFirst()
+        }
+
+        return false
+    }
+
 }
