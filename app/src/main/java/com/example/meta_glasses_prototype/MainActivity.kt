@@ -29,11 +29,11 @@ class MainActivity : AppCompatActivity() {
             helloText.text = "Full gallery access granted ✅"
 
             // MediaScanner running
-            val imageUris = MediaScanner.getImagesFromMetaFolder(this)
-            helloText.text = "Found ${imageUris.size} image(s) in Meta folder"
+            val imageUris = MediaScanner.getImagesFromMetaAIFolder(this)
+            helloText.text = "Found ${imageUris.size} image(s) in Meta AI folder"
 
             if (imageUris.isNotEmpty()) {
-                imageView.setImageURI(imageUris[0]) // show the first image
+                imageView.setImageURI(imageUris[0]) // Show preview
             }
         } else if (Build.VERSION.SDK_INT >= 34) {
             // Show dialog only if Android 14+ (API 34) and permission partially granted
