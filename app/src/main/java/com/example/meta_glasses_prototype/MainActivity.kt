@@ -14,6 +14,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import android.content.pm.PackageManager
+import com.example.meta_glasses_prototype.MediaScanner
 
 class MainActivity : AppCompatActivity() {
 
@@ -26,9 +27,16 @@ class MainActivity : AppCompatActivity() {
     ) { permissions ->
         if (arePermissionsFullyGranted()) {
             helloText.text = "Full gallery access granted ✅"
-            // ✅ TODO: You can scan MediaStore or load gallery items here
+
+            // MediaScanner running
+            val imageUris = MediaScanner.getImagesFromMetaFolder(this)
+            helloText.text = "Found ${imageUris.size} image(s) in Meta folder"
+
+            if (imageUris.isNotEmpty()) {
+                imageView.setImageURI(imageUris[0]) // show the first image
+            }
         } else if (Build.VERSION.SDK_INT >= 34) {
-            // ✅ Show dialog only if Android 14+ (API 34) and permission partially granted
+            // Show dialog only if Android 14+ (API 34) and permission partially granted
             showLimitedAccessDialog()
         } else {
             helloText.text = "Access denied ❌"
