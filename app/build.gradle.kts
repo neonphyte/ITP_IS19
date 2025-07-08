@@ -59,5 +59,6 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.mlkit:face-detection:16.1.7") //
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
 
 }
