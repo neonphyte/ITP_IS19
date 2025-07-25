@@ -8,6 +8,7 @@ import android.os.Build
 import android.provider.MediaStore
 import java.io.IOException
 import java.io.OutputStream
+import java.io.File
 
 object FileManager {
 
@@ -77,4 +78,28 @@ object FileManager {
         }
         return null
     }
+
+    fun saveBitmapFromFile(context: Context, bitmap: Bitmap, originalFile: File, prefix: String) {
+        val fileName = prefix + originalFile.name
+        saveBitmap(context, bitmap, Uri.fromFile(originalFile), prefix)
+    }
+
+    fun isAlreadyProcessed(context: Context, fileName: String): Boolean {
+        val projection = arrayOf(MediaStore.Images.Media.DISPLAY_NAME)
+        val selection = "${MediaStore.Images.Media.DISPLAY_NAME} = ?"
+        val selectionArgs = arrayOf(fileName)
+
+        context.contentResolver.query(
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            projection,
+            selection,
+            selectionArgs,
+            null
+        )?.use { cursor ->
+            return cursor.moveToFirst()
+        }
+
+        return false
+    }
+
 }

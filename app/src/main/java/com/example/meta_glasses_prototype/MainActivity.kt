@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
 import android.provider.Settings
 import android.widget.Button
 import android.widget.TextView
@@ -13,26 +14,22 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import android.content.pm.PackageManager
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequestBuilder
-import java.util.concurrent.TimeUnit
+import android.graphics.BitmapFactory // ✅ ADDED
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import java.lang.Exception          // ✅ ADDED
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var helloText: TextView
+    private var folderObserver: MetaFolderObserver? = null
 
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { _ ->
         if (arePermissionsFullyGranted()) {
-            helloText.text = "Gallery access granted ✅\nProcessing will run in background..."
-            scheduleFaceBlurWorker()
-
-            // ✅ Enqueue the background worker
-//            val workRequest = OneTimeWorkRequestBuilder<FaceBlurWorker>().build()
-//            WorkManager.getInstance(this).enqueue(workRequest)
+            helloText.text = "Gallery access granted ✅\nWatching Meta AI folder..."
+            startFolderObserver()
         } else if (Build.VERSION.SDK_INT >= 34) {
             showLimitedAccessDialog()
         } else {
@@ -92,15 +89,57 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-    private fun scheduleFaceBlurWorker() {
-        val request = PeriodicWorkRequestBuilder<FaceBlurWorker>(
-            15, TimeUnit.MINUTES
-        ).build()
+    private fun startFolderObserver() {
+        if (folderObserver == null) {
+            folderObserver = MetaFolderObserver(this)
+            folderObserver?.startWatching()
+        }
 
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-            "face_blur_job",
-            ExistingPeriodicWorkPolicy.KEEP, // Only one runs at a time
-            request
-        )
+        // Scan existing images
+        processExistingImages()
+    }
+
+    override fun onDestroy() {
+        folderObserver?.stopWatching()
+        super.onDestroy()
+    }
+
+    private fun processExistingImages() {
+        lifecycleScope.launch {
+            val imageUris = MediaScanner.getImagesFromMetaAIFolder(this@MainActivity)
+            var processedCount = 0
+
+            for (uri in imageUris) {
+                try {
+                    val fileName = getFileNameFromUri(uri) ?: continue
+                    if (FileManager.isAlreadyProcessed(this@MainActivity, "Processed_$fileName")) continue
+
+                    val inputStream = contentResolver.openInputStream(uri)
+                    val bitmap = BitmapFactory.decodeStream(inputStream)
+                    inputStream?.close()
+
+                    if (bitmap != null) {
+                        val blurred = ImageProcessor.blurFaces(this@MainActivity, bitmap)
+                        FileManager.saveBitmap(this@MainActivity, blurred, uri, "Processed_")
+                        processedCount++
+                    }
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+
+            helloText.text = "Processed $processedCount existing image(s) ✅"
+        }
+    }
+
+
+    private fun getFileNameFromUri(uri: Uri): String? {
+        val projection = arrayOf(MediaStore.Images.Media.DISPLAY_NAME)
+        contentResolver.query(uri, projection, null, null, null)?.use { cursor ->
+            val idx = cursor.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME)
+            return if (cursor.moveToFirst()) cursor.getString(idx) else null
+        }
+        return null
     }
 }
