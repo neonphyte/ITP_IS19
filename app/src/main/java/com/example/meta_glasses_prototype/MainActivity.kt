@@ -14,22 +14,25 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory // ✅ ADDED
+import android.graphics.BitmapFactory
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
-import java.lang.Exception          // ✅ ADDED
+import java.lang.Exception
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var helloText: TextView
-    private var folderObserver: MetaFolderObserver? = null
+    //private var folderObserver: MetaFolderObserver? = null
 
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { _ ->
         if (arePermissionsFullyGranted()) {
             helloText.text = "Gallery access granted ✅\nWatching Meta AI folder..."
-            startFolderObserver()
+            //startFolderObserver()
+            val serviceIntent = Intent(this, MetaFolderService::class.java)
+            ContextCompat.startForegroundService(this, serviceIntent)
+
         } else if (Build.VERSION.SDK_INT >= 34) {
             showLimitedAccessDialog()
         } else {
@@ -89,18 +92,18 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-    private fun startFolderObserver() {
-        if (folderObserver == null) {
-            folderObserver = MetaFolderObserver(this)
-            folderObserver?.startWatching()
-        }
-
-        // Scan existing images
-        processExistingImages()
-    }
+//    private fun startFolderObserver() {
+//        if (folderObserver == null) {
+//            folderObserver = MetaFolderObserver(this)
+//            folderObserver?.startWatching()
+//        }
+//
+//        // Scan existing images
+//        processExistingImages()
+//    }
 
     override fun onDestroy() {
-        folderObserver?.stopWatching()
+//        folderObserver?.stopWatching()
         super.onDestroy()
     }
 
