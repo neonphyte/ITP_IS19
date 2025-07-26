@@ -19,7 +19,7 @@ class MetaFolderService : Service() {
     override fun onCreate() {
         super.onCreate()
         startForegroundServiceWithNotification()
-        processExistingImagesOnce() // ✅ Scan existing images
+        processExistingImagesOnce() // Scan existing images
         startObservingMetaFolder()
     }
 
@@ -51,9 +51,9 @@ class MetaFolderService : Service() {
                             val blurred = ImageProcessor.blurFaces(applicationContext, bitmap)
                             FileManager.saveBitmapFromFile(applicationContext, blurred, file, "Processed_")
 
-                            Log.d("MetaFolderService", "✅ Processed and saved: ${file.name}")
+                            Log.d("MetaFolderService", "Processed and saved: ${file.name}")
                         } catch (e: Exception) {
-                            Log.e("MetaFolderService", "❌ Error: ${e.message}")
+                            Log.e("MetaFolderService", "Error: ${e.message}")
                         }
                     }
                 }
@@ -80,9 +80,9 @@ class MetaFolderService : Service() {
                     val blurred = ImageProcessor.blurFaces(applicationContext, bitmap)
                     FileManager.saveBitmapFromFile(applicationContext, blurred, file, "Processed_")
 
-                    Log.d("MetaFolderService", "🧠 Processed existing file: ${file.name}")
+                    Log.d("MetaFolderService", "Processed existing file: ${file.name}")
                 } catch (e: Exception) {
-                    Log.e("MetaFolderService", "❌ Error on existing file: ${e.message}")
+                    Log.e("MetaFolderService", "Error on existing file: ${e.message}")
                 }
             }
         }

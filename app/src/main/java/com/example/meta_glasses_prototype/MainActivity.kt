@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
         ActivityResultContracts.RequestMultiplePermissions()
     ) { _ ->
         if (arePermissionsFullyGranted()) {
-            helloText.text = "Gallery access granted ✅\nWatching Meta AI folder..."
+            helloText.text = "Gallery access granted \nWatching Meta AI folder..."
             //startFolderObserver()
             val serviceIntent = Intent(this, MetaFolderService::class.java)
             ContextCompat.startForegroundService(this, serviceIntent)
@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity() {
         } else if (Build.VERSION.SDK_INT >= 34) {
             showLimitedAccessDialog()
         } else {
-            helloText.text = "Gallery access denied ❌"
+            helloText.text = "Gallery access denied"
         }
     }
 
@@ -92,18 +92,7 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-//    private fun startFolderObserver() {
-//        if (folderObserver == null) {
-//            folderObserver = MetaFolderObserver(this)
-//            folderObserver?.startWatching()
-//        }
-//
-//        // Scan existing images
-//        processExistingImages()
-//    }
-
     override fun onDestroy() {
-//        folderObserver?.stopWatching()
         super.onDestroy()
     }
 
@@ -132,7 +121,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            helloText.text = "Processed $processedCount existing image(s) ✅"
+            helloText.text = "Processed $processedCount existing image(s)"
         }
     }
 
