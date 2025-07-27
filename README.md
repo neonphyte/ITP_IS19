@@ -1,6 +1,6 @@
 # ITP_IS19 Privacy in Meta Ray-Ban Glasses
 
-An Android app that scans synced photos from Meta Glasses, detects faces in those images, applies a blur effect, and outputs the processed images into a new folder — all done seamlessly in the background. 
+An Android app that scans synced photos from Meta Glasses, detects faces in those images, applies a blur effect, and outputs the processed images into a new folder.
 
 ##  Features
 
@@ -8,8 +8,7 @@ An Android app that scans synced photos from Meta Glasses, detects faces in thos
 -  Scans the **Meta AI** folder inside `Download/`
 -  Detects and blurs faces using ML Kit
 -  Outputs to a **ProcessedImages** folder without overwriting originals
--  ~~Automatically processes new images every 15 minutes using `WorkManager`~~
--  ~~Runs in the background (even after swiping the app away)~~
+-  Automatically processes new images when the app is active
 
 ---
 
@@ -25,7 +24,7 @@ An Android app that scans synced photos from Meta Glasses, detects faces in thos
 
 ├── FileManager.kt # Saves processed images to new location
 
-├── FaceBlurWorker.kt # Background worker to automate scanning and processing
+├── MetaFolderService.kt: # A persistent Android Service that observes file changes in the Meta AI folder and automatically processes newly added images.
 
 ├── res/layout/activity_main.xml
 
@@ -38,7 +37,6 @@ An Android app that scans synced photos from Meta Glasses, detects faces in thos
 1. Launch the app and tap the **"Allow Access"** button
 2. App requests `READ_MEDIA_IMAGES` / `READ_EXTERNAL_STORAGE`
 3. After permission is granted:
-- Runs background face detection every 15 minutes
 - Checks for new unprocessed images in `Download/Meta AI/`
 - Blurs any faces found
 - Saves output into `DCIM/ProcessedImages/`
@@ -58,5 +56,7 @@ An Android app that scans synced photos from Meta Glasses, detects faces in thos
 ## 🔐 Permissions
 
 ```xml
-<uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+<uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
